@@ -2,6 +2,11 @@
 
 A module that brings the ACID where it's needed, typically in Amazon DynamoDB.
 
+### Important things first
+
+The name comes from the initials of the people who coined the term and developed the theory behind it, 
+as written in (http://en.wikipedia.org/wiki/ACID)[the Wikipedia article about ACID].
+
 ### Testing
 
 To run tests `make test`.
