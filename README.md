@@ -1,5 +1,9 @@
-# A very simple node starting project
+# jgarth
 
-To run tests `make test`
+A module that brings the ACID where it's needed, typically in Amazon DynamoDB.
 
-To run testem so that tests run on file change either run `npm run dev` or `make -s`
+### Testing
+
+To run tests `make test`.
+
+To run testem so that tests run on file change either run `npm run dev` or `make -s`.
