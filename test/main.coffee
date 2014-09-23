@@ -1,5 +1,7 @@
 should = require 'should'
 sinon = require 'sinon'
+awsSDK = require 'aws-sdk'
+async = require 'async'
 
 describe 'testing', ->
 
@@ -9,48 +11,109 @@ describe 'lib', ->
 
   beforeEach ->
     @lib = require '../index'
-
-  it 'could be required', -> should.exist @lib
+    @db = new awsSDK.DynamoDB()
     
-  describe 'transaction', ->
-
-    beforeEach ->
-      conf =
-        transactionsTable: 'transaction-table'
-        imagesTable: 'images-table'
-      @transaction = @lib conf
-
-    it 'is a function', -> @lib.should.be.a.Function
+  it 'could be required', -> should.exist @lib
   
-    it 'returns a function', -> @transaction.should.be.a.Function
+  it 'is a module', -> @lib.should.be.a.Object
 
-    it 'creates the transaction table if it does not exist', ->
-      fail()
+  describe 'prepareTransactionsTable', ->
 
+    beforeEach -> sinon.stub(@db, 'createTable').yields()
+    afterEach -> @db.createTable.restore()
+     
+    it 'creates the transactions table if it does not exist', ->
+      sinon.stub(@db, 'describeTable').yields code: 'ResourceNotFoundException'
+      @lib.prepareTransactionsTable @db, 'transactions-table'
+      @db.describeTable.calledOnce.should.be.true
+      @db.createTable.calledOnce.should.be.true
+      @db.createTable.args[0][0].should.equal 'transactions-table'
+      @db.describeTable.restore()
+
+    it 'does not create the transactions table if it exists', ->
+      stub = sinon.stub(@db, 'describeTable')
+      stub.withArgs('transactions-table').yields null
+      @lib.prepareTransactionsTable @db, 'transactions-table'
+      @db.describeTable.calledOnce.should.be.true
+      @db.createTable.calledOnce.should.be.false
+      @db.describeTable.restore()
+    
+  describe 'prepareImagesTable', ->
+
+    beforeEach -> sinon.stub(@db, 'createTable').yields()
+    afterEach -> @db.createTable.restore()
+    
     it 'creates the images table if it does not exist', ->
-      fail()
+      sinon.stub(@db, 'describeTable').yields code: 'ResourceNotFoundException'
+      @lib.prepareImagesTable @db, 'images-table'
+      @db.describeTable.calledOnce.should.be.true
+      @db.createTable.calledOnce.should.be.true
+      @db.createTable.args[0][0].should.equal 'images-table'
+      @db.describeTable.restore()
 
-    it 'returns the execution to the module when the tables are there', (done) ->
-      done 'ERROR'
-      
-    describe 'tx', ->
+    it 'does not create the images table if it exists', ->
+      stub = sinon.stub(@db, 'describeTable')
+      stub.withArgs('images-table').yields null
+      @lib.prepareImagesTable @db, 'images-table'
+      @db.describeTable.calledOnce.should.be.true
+      @db.createTable.calledOnce.should.be.false
+      @db.describeTable.restore()
   
-      # it should just wrap around the node aws sdk object
-      # and also expose the following
+  describe 'transaction', ->
+  
+    it 'prepares the images and transactions tables, calling back passing tx', ->
+      sinon.stub(@lib, 'prepareTransactionsTable').yields()
+      sinon.stub(@lib, 'prepareImagesTable').yields()
+      stub = sinon.stub()
+      @lib.transaction @db, stub
+      stub.calledOnce.should.be.true
+      should.not.exist stub.args[0][0]
+      stub.args[0][1].should.equal @lib.tx
+      @lib.prepareTransactionsTable.restore()
+      @lib.prepareImagesTable.restore()
+  
+    it 'errors if preparing the transactions table errors', ->
+      sinon.stub(@lib, 'prepareTransactionsTable').yields('ERROR')
+      stub = sinon.stub()
+      @lib.transaction @db, stub
+      stub.calledOnce.should.be.true
+      stub.args[0][0].should.equal 'ERROR'
+      @lib.prepareTransactionsTable.restore()
+      
+    it 'errors if preparing the images table errors', ->
+      sinon.stub(@lib, 'prepareImagesTable').yields('ERROR')
+      stub = sinon.stub()
+      @lib.transaction @db, stub
+      stub.calledOnce.should.be.true
+      stub.args[0][0].should.equal 'ERROR'
+      @lib.prepareImagesTable.restore()
+  
+    describe 'tx', ->
 
-      it 'wraps the amazon sdk module (aws-sdk)', ->
-        fail()
+      beforeEach ->      
+        @db = new awsSDK.DynamoDB();
+  
+      it 'exists', -> should.exist @lib.tx
 
-      it 'writes the record to the temporary table (EXPAND WITH THE CORRECT DESCRIPTION)', (done) ->
+      describe 'putItem', ->
+
+        it 'should call sdk putItem', (done) ->
+          sinon.stub(@db, 'putItem').yields()
+          @lib.tx.putItem @db, 'ITEM', =>
+            @db.putItem.calledOnce.should.be.true
+            @db.putItem.args[0][0].should.equal 'ITEM'
+            done()
+          
+      xit 'writes the record to the temporary table (EXPAND WITH THE CORRECT DESCRIPTION)', (done) ->
         done 'ERROR'
 
-      describe 'commit', ->
+      xdescribe 'commit', ->
 
         it 'should be available', ->
-          @lib (tx) -> tx.commit.should.be.a.Function
+          @transaction (tx) -> tx.commit.should.be.a.Function
    
         it 'cleans the transaction table after the commit', (done) ->
           done 'ERROR'
 
-        it 'cleans the images table after the commit', ->
+        it 'cleans the images table after the commit', (done) ->
           done 'ERROR'

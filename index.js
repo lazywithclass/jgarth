@@ -1,19 +1,54 @@
+var async = require('async');
+
 var tx = {
-  commit: function() {}
+  putItem: function(db, item, cb) {
+    db.putItem(item, cb);
+  }
 };
 
-var configuration = {};
+var jgarth = {
 
-module.exports = function transaction(conf) {
+  tx: tx, 
 
-  // configuration = conf.transactionsTable;
-  // configuration = conf.imagesTable;
+  prepareTransactionsTable: function(db, name, cb) {
+    db.describeTable({
+      TableName: name
+    }, function(e, data) {
+      if (e && e.code && e.code === 'ResourceNotFoundException') {
+        db.createTable(name, function() {});
+      }
+    });
+  },
+  
+  prepareImagesTable: function(db, name, cb) {
+    db.describeTable({
+      TableName: name
+    }, function(e, data) {
+      if (e && e.code && e.code === 'ResourceNotFoundException') {
+        db.createTable(name, function() {});
+      }
+    });
+  },
 
-  return function(fun) {
-    return fun(tx);
-  };
+  transaction: function(db, done) {
+    
+    async.parallel([
+      function(cb) {
+        jgarth.prepareTransactionsTable(db, 'transactions-table', cb);
+      },
+      function(cb) {
+        jgarth.prepareImagesTable(db, 'images-table', cb);
+      }
+    ], function(err, results) {
+      if (err) {
+        return done(err);
+      }
+      done(null, jgarth.tx);
+    });
+  }
 };
 
+module.exports = jgarth;
 
 // EXAMPLE
 // transaction(function(tx) {
