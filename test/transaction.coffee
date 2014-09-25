@@ -1,7 +1,12 @@
+awsSDK = require 'aws-sdk'
 sinon = require 'sinon'
 should = require 'should'
   
 describe 'transaction', ->
+
+  beforeEach ->
+    @lib = require '../index'
+    @db = new awsSDK.DynamoDB()
   
   it 'prepares the images and transactions tables, calling back passing tx', ->
     sinon.stub(@lib, 'prepareTransactionsTable').yields()

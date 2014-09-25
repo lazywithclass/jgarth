@@ -5,6 +5,7 @@ should = require 'should'
 describe 'tx', ->
 
   beforeEach ->      
+    @lib = require '../index'
     @db = new awsSDK.DynamoDB();
           
   it 'exists', -> should.exist @lib.tx
