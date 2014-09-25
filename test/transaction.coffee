@@ -29,4 +29,3 @@ describe 'transaction', ->
     stub.calledOnce.should.be.true
     stub.args[0][0].should.equal 'ERROR'
     @lib.prepareImagesTable.restore()
-  
