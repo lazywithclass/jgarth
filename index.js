@@ -49,18 +49,3 @@ var jgarth = {
 };
 
 module.exports = jgarth;
-
-// EXAMPLE
-// transaction(function(tx) {
-//   async.parallel([
-//     function(cb) {
-//       return fun1(tx, cb);
-//     },
-//     function(cb) {
-//       return fun2(tx, cb);
-//     }
-//   ], function() {
-//     tx.commit();
-//     tx.cleanup(); // might as well go into commit
-//   });
-// });
