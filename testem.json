@@ -4,6 +4,9 @@
             "command": "make test"
         }
     },
+    "src_files": [
+        "test/*.coffee", "index.js"
+    ],
     "launch_in_dev": [ "Node" ],
     "launch_in_ci": [ "Node" ]
 }
