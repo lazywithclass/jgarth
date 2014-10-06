@@ -1,8 +1,42 @@
 var async = require('async');
 
 var tx = {
-  putItem: function(db, item, cb) {
-    db.putItem(item, cb);
+  updateItem: function(db, item, cb) {
+    var query = {
+      TableName: 'transactions-table',
+      Key: {
+        TransactionId: {
+          S: ''
+        }
+      },
+      AttributeUpdates: {
+        Requests: {
+          Value: {
+            S: JSON.stringify(item)
+          },
+          Action: 'PUT'
+        },
+        Version: {
+          Value: {
+            S: '1'
+          },
+          Action: 'ADD'
+        },
+        Date: {
+          Value: {
+            S: new Date().getTime().toString()
+          },
+          Action: 'PUT'
+        }
+      },
+      Expected: {
+        State: {
+          ComparisonOperator: 'EQ',
+          AttributeValueList: [ { S: 'PENDING' } ]
+        }
+      }   
+    };
+    db.updateItem(query, cb);
   }
 };
 
