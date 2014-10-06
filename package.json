@@ -12,7 +12,8 @@
   "license": "BSD",
   "dependencies": {
     "async": "^0.9.0",
-    "aws-sdk": "^2.0.17"
+    "aws-sdk": "^2.0.17",
+    "node-uuid": "^1.4.1"
   },
   "devDependencies": {
     "coffee-script": "^1.7.1",

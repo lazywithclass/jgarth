@@ -1,4 +1,5 @@
-var async = require('async');
+var async = require('async'),
+    uuid = require('node-uuid');
 
 var tx = {
   updateItem: function(db, item, cb) {
@@ -64,8 +65,7 @@ var jgarth = {
     });
   },
 
-  transaction: function(db, done) {
-    
+  transaction: function(db, done) {    
     async.parallel([
       function(cb) {
         jgarth.prepareTransactionsTable(db, 'transactions-table', cb);
@@ -77,6 +77,7 @@ var jgarth = {
       if (err) {
         return done(err);
       }
+      jgarth.transactionId = uuid.v4();
       done(null, jgarth.tx);
     });
   }
