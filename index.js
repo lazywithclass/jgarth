@@ -50,7 +50,7 @@ function _prepareTable(db, name, cb) {
     if (e && e.code && e.code === 'ResourceNotFoundException') {
       return db.createTable(name, cb);
     }
-    return cb();
+    return cb(e);
   });
 }
 

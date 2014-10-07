@@ -32,10 +32,19 @@ describe 'lib', ->
         done()
 
     it 'does not create the transactions table if it exists', (done) ->
-      stub = sinon.stub(@db, 'describeTable').yields null
+      stub = sinon.stub(@db, 'describeTable').yields()
       @lib.prepareTransactionsTable @db, 'transactions-table', =>
         @db.describeTable.calledOnce.should.be.true
         @db.createTable.calledOnce.should.be.false
+        @db.describeTable.restore()
+        done()
+
+    it 'errors if the call to dynamo errors', (done) ->
+      stub = sinon.stub(@db, 'describeTable').yields 'ERROR'
+      @lib.prepareTransactionsTable @db, 'transactions-table', (e) =>
+        @db.describeTable.calledOnce.should.be.true
+        @db.createTable.calledOnce.should.be.false
+        e.should.equal 'ERROR'
         @db.describeTable.restore()
         done()
     
@@ -51,9 +60,18 @@ describe 'lib', ->
         done()
 
     it 'does not create the images table if it exists', (done) ->
-      sinon.stub(@db, 'describeTable').yields null
+      sinon.stub(@db, 'describeTable').yields()
       @lib.prepareImagesTable @db, 'images-table', =>
         @db.describeTable.calledOnce.should.be.true
         @db.createTable.calledOnce.should.be.false
+        @db.describeTable.restore()
+        done()
+
+    it 'errors if the call to dynamo errors', (done) ->
+      stub = sinon.stub(@db, 'describeTable').yields 'ERROR'
+      @lib.prepareImagesTable @db, 'images-table', (e) =>
+        @db.describeTable.calledOnce.should.be.true
+        @db.createTable.calledOnce.should.be.false
+        e.should.equal 'ERROR'
         @db.describeTable.restore()
         done()
