@@ -8,7 +8,7 @@ describe 'tx', ->
     @lib = require '../index'
     @db = new awsSDK.DynamoDB()
           
-  it 'exists', -> should.exist @lib.tx
+  it 'exists', -> should.exist @lib.Tx
 
   describe 'updateItem', ->
 
@@ -18,7 +18,8 @@ describe 'tx', ->
     it 'should add the item to the transaction', (done) ->
       sinon.stub(@db, 'updateItem').yields()
       item = { answer: 42 }
-      @lib.tx.updateItem @db, item, =>
+      tx = new @lib.Tx
+      tx.updateItem @db, item, =>
         @db.updateItem.calledOnce.should.be.true
         @db.updateItem.args[0][0].TableName.should.equal 'transactions-table'
         @db.updateItem.args[0][0].AttributeUpdates.Requests.Value.S.should.equal JSON.stringify item

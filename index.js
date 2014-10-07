@@ -1,49 +1,51 @@
 var async = require('async'),
     uuid = require('node-uuid');
 
-var tx = {
-  updateItem: function(db, item, cb) {
-    var query = {
-      TableName: 'transactions-table',
-      Key: {
-        TransactionId: {
-          S: ''
-        }
-      },
-      AttributeUpdates: {
-        Requests: {
-          Value: {
-            S: JSON.stringify(item)
-          },
-          Action: 'PUT'
+var Tx = function(options) {
+  this.id = options && options.id;
+};
+
+Tx.prototype.updateItem = function(db, item, cb) {
+  var query = {
+    TableName: 'transactions-table',
+    Key: {
+      TransactionId: {
+        S: ''
+      }
+    },
+    AttributeUpdates: {
+      Requests: {
+        Value: {
+          S: JSON.stringify(item)
         },
-        Version: {
-          Value: {
-            S: '1'
-          },
-          Action: 'ADD'
-        },
-        Date: {
-          Value: {
-            S: new Date().getTime().toString()
-          },
-          Action: 'PUT'
-        }
+        Action: 'PUT'
       },
-      Expected: {
-        State: {
-          ComparisonOperator: 'EQ',
-          AttributeValueList: [ { S: 'PENDING' } ]
-        }
-      }   
-    };
-    db.updateItem(query, cb);
-  }
+      Version: {
+        Value: {
+          S: '1'
+        },
+        Action: 'ADD'
+      },
+      Date: {
+        Value: {
+          S: new Date().getTime().toString()
+        },
+        Action: 'PUT'
+      }
+    },
+    Expected: {
+      State: {
+        ComparisonOperator: 'EQ',
+        AttributeValueList: [ { S: 'PENDING' } ]
+      }
+    }   
+  };
+  db.updateItem(query, cb);
 };
 
 var jgarth = {
-
-  tx: tx, 
+  
+  Tx: Tx,
 
   prepareTransactionsTable: function(db, name, cb) {
     db.describeTable({
@@ -74,11 +76,9 @@ var jgarth = {
         jgarth.prepareImagesTable(db, 'images-table', cb);
       }
     ], function(err, results) {
-      if (err) {
-        return done(err);
-      }
-      jgarth.transactionId = uuid.v4();
-      done(null, jgarth.tx);
+      done(err, new jgarth.Tx({
+        id: uuid.v4()
+      }));
     });
   }
 };
