@@ -43,31 +43,24 @@ TransactionItem.prototype.updateItem = function(db, item, cb) {
   db.updateItem(query, cb);
 };
 
+function _prepareTable(db, name, cb) {
+  db.describeTable({
+    TableName: name
+  }, function(e, data) {
+    if (e && e.code && e.code === 'ResourceNotFoundException') {
+      return db.createTable(name, cb);
+    }
+    return cb();
+  });
+}
+
 var jgarth = {
   
   TransactionItem: TransactionItem,
 
-  prepareTransactionsTable: function(db, name, cb) {
-    db.describeTable({
-      TableName: name
-    }, function(e, data) {
-      if (e && e.code && e.code === 'ResourceNotFoundException') {
-        return db.createTable(name, cb);
-      }
-      return cb();
-    });
-  },
+  prepareTransactionsTable: _prepareTable,
   
-  prepareImagesTable: function(db, name, cb) {
-    db.describeTable({
-      TableName: name
-    }, function(e, data) {
-      if (e && e.code && e.code === 'ResourceNotFoundException') {
-        return db.createTable(name, cb);
-      }
-      return cb();
-    });
-  },
+  prepareImagesTable: _prepareTable,
 
   transaction: function(db, done) {    
     async.parallel([
