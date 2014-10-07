@@ -27,7 +27,19 @@ describe 'lib', ->
       @lib.prepareTransactionsTable @db, 'transactions-table', =>
         @db.describeTable.calledOnce.should.be.true
         @db.createTable.calledOnce.should.be.true
-        @db.createTable.args[0][0].should.equal 'transactions-table'
+        @db.createTable.args[0][0].should.eql
+          TableName: 'transactions-table'
+          AttributeDefinitions: [
+            AttributeName: 'TransactionId'
+            AttributeType: 'S'
+          ]
+          KeySchema: [
+            AttributeName: 'TransactionId'
+            KeyType: 'HASH'
+          ]
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
         @db.describeTable.restore()
         done()
 
@@ -55,7 +67,19 @@ describe 'lib', ->
       @lib.prepareImagesTable @db, 'images-table', =>
         @db.describeTable.calledOnce.should.be.true
         @db.createTable.calledOnce.should.be.true
-        @db.createTable.args[0][0].should.equal 'images-table'
+        @db.createTable.args[0][0].should.eql
+          TableName: 'images-table'
+          AttributeDefinitions: [
+            AttributeName: 'TransactionId'
+            AttributeType: 'S'
+          ]
+          KeySchema: [
+            AttributeName: 'TransactionId'
+            KeyType: 'HASH'
+          ]
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
         @db.describeTable.restore()
         done()
 

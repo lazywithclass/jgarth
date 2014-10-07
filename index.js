@@ -48,7 +48,21 @@ function _prepareTable(db, name, cb) {
     TableName: name
   }, function(e, data) {
     if (e && e.code && e.code === 'ResourceNotFoundException') {
-      return db.createTable(name, cb);
+      return db.createTable({ 
+        TableName: name,
+        AttributeDefinitions: [{
+            AttributeName: 'TransactionId',
+            AttributeType: 'S'
+        }], 
+        KeySchema: [{
+          AttributeName: 'TransactionId',
+          KeyType: 'HASH'
+        }], 
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1
+        }
+      }, cb);
     }
     return cb(e);
   });
