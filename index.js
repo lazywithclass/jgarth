@@ -52,8 +52,9 @@ var jgarth = {
       TableName: name
     }, function(e, data) {
       if (e && e.code && e.code === 'ResourceNotFoundException') {
-        db.createTable(name, function() {});
+        return db.createTable(name, cb);
       }
+      return cb();
     });
   },
   
@@ -62,8 +63,9 @@ var jgarth = {
       TableName: name
     }, function(e, data) {
       if (e && e.code && e.code === 'ResourceNotFoundException') {
-        db.createTable(name, function() {});
+        return db.createTable(name, cb);
       }
+      return cb();
     });
   },
 
