@@ -1,11 +1,11 @@
 var async = require('async'),
     uuid = require('node-uuid');
 
-var Tx = function(options) {
+var TransactionItem = function(options) {
   this.id = options && options.id;
 };
 
-Tx.prototype.updateItem = function(db, item, cb) {
+TransactionItem.prototype.updateItem = function(db, item, cb) {
   var query = {
     TableName: 'transactions-table',
     Key: {
@@ -45,7 +45,7 @@ Tx.prototype.updateItem = function(db, item, cb) {
 
 var jgarth = {
   
-  Tx: Tx,
+  TransactionItem: TransactionItem,
 
   prepareTransactionsTable: function(db, name, cb) {
     db.describeTable({
@@ -76,7 +76,7 @@ var jgarth = {
         jgarth.prepareImagesTable(db, 'images-table', cb);
       }
     ], function(err, results) {
-      done(err, new jgarth.Tx({
+      done(err, new jgarth.TransactionItem({
         id: uuid.v4()
       }));
     });

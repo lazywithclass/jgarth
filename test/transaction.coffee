@@ -13,14 +13,14 @@ describe 'transaction', ->
     delete @lib.transactionId
     @lib = undefined
 
-  it 'prepares the images and transactions tables, calling back passing tx', ->
+  it 'prepares the images and transactions tables, calling back passing transactionItem', ->
     sinon.stub(@lib, 'prepareTransactionsTable').yields()
     sinon.stub(@lib, 'prepareImagesTable').yields()
     stub = sinon.stub()
     @lib.transaction db, stub
     stub.calledOnce.should.be.true
     should.not.exist stub.args[0][0]
-    stub.args[0][1].should.be.an.instanceOf @lib.Tx
+    stub.args[0][1].should.be.an.instanceOf @lib.TransactionItem
     @lib.prepareTransactionsTable.restore()
     @lib.prepareImagesTable.restore()
   
@@ -45,9 +45,9 @@ describe 'transaction', ->
     sinon.stub(@lib, 'prepareImagesTable').yields()
     stub = sinon.stub()
     @lib.transaction db, stub
-    tx = stub.args[0][1]
-    should.exist tx.id
-    tx.id.should.match /[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+    transactionItem = stub.args[0][1]
+    should.exist transactionItem.id
+    transactionItem.id.should.match /[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
     @lib.prepareTransactionsTable.restore()
     @lib.prepareImagesTable.restore()
 
@@ -57,11 +57,11 @@ describe 'transaction', ->
     
     stub1 = sinon.stub()
     @lib.transaction db, stub1
-    tx1 = stub1.args[0][1]
+    transactionItem1 = stub1.args[0][1]
     stub2 = sinon.stub()
     @lib.transaction db, stub2
-    tx2 = stub2.args[0][1]
-    tx1.id.should.not.equal tx2.id
+    transactionItem2 = stub2.args[0][1]
+    transactionItem1.id.should.not.equal transactionItem2.id
     
     @lib.prepareTransactionsTable.restore()
     @lib.prepareImagesTable.restore()
