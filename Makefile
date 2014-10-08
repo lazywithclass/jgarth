@@ -1,10 +1,14 @@
-testem:
+# will be used as default as long as it's the first
+testem: git-hooks
 	./node_modules/.bin/testem
 
-test:
+git-hooks: 
+	ln -fs `pwd`/git-hooks/pre-commit .git/hooks/pre-commit
+
+test: git-hooks
 	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test
 
-integration-test:
+integration-test: git-hooks
 	java -Djava.library.path=$$(pwd)/test/integration/lib/DynamoDBLocal_lib \
 	  -Djava.util.logging.config.file=/dev/null \
       -Dorg.eclipse.jetty.LEVEL=WARN \
@@ -15,4 +19,4 @@ integration-test:
 	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test/integration/main.coffee
 	ps -ef | grep [D]ynamoDBLocal_lib | awk '{print $$2}' | xargs kill
 
-.PHONY: test
+.PHONY: test git-hooks
