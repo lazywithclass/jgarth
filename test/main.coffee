@@ -99,3 +99,8 @@ describe 'lib', ->
         e.should.equal 'ERROR'
         @db.describeTable.restore()
         done()
+
+  describe 'lockItem', ->
+
+    it 'exists', ->
+      should.exist @lib.lockItem

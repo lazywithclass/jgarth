@@ -90,6 +90,10 @@ var jgarth = {
         id: uuid.v4()
       }));
     });
+  },
+
+  lockItem: function() {
+    
   }
 };
 
