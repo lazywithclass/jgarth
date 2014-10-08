@@ -10,7 +10,7 @@ TransactionItem.prototype.updateItem = function(db, item, cb) {
     TableName: 'transactions-table',
     Key: {
       TransactionId: {
-        S: ''
+        S: this.id.toString()
       }
     },
     AttributeUpdates: {
@@ -34,6 +34,7 @@ TransactionItem.prototype.updateItem = function(db, item, cb) {
       }
     },
     Expected: {
+      // version is missing here
       State: {
         ComparisonOperator: 'EQ',
         AttributeValueList: [ { S: 'PENDING' } ]

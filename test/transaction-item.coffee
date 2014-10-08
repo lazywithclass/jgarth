@@ -18,7 +18,7 @@ describe 'TransactionItem', ->
     it 'should add the item to the transaction', (done) ->
       sinon.stub(@db, 'updateItem').yields()
       item = { answer: 42 }
-      transactionItem = new @lib.TransactionItem
+      transactionItem = new @lib.TransactionItem id: 'this-is-a-fake-guid'
       transactionItem.updateItem @db, item, =>
         @db.updateItem.calledOnce.should.be.true
         @db.updateItem.args[0][0].TableName.should.equal 'transactions-table'
@@ -31,6 +31,6 @@ describe 'TransactionItem', ->
         @db.updateItem.args[0][0].Expected.State.ComparisonOperator.should.equal 'EQ'
         @db.updateItem.args[0][0].Expected.State.AttributeValueList.should.eql [ { S: 'PENDING' } ]
         # figure out how to handle the transaction id
-        @db.updateItem.args[0][0].Key.TransactionId.should.eql S: ''
+        @db.updateItem.args[0][0].Key.TransactionId.should.eql S: 'this-is-a-fake-guid'
         
         done()
