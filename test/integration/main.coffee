@@ -1,3 +1,4 @@
+should = require 'should'
 spawn = require('child_process').spawn
 awsSDK = require 'aws-sdk'
 lib = require '../../index'
@@ -8,11 +9,19 @@ awsSDK.config.update
   region: 'dagobah'
 dynamodb = new awsSDK.DynamoDB endpoint: new awsSDK.Endpoint 'http://localhost:8000'
 
-lib.prepareTransactionsTable dynamodb, 'transactions-table', (e) ->
-  console.log e.stack if e
-  console.log 'done'
 
-# make this a proper integration test
-# assert that the table is there
-# dynamodb.listTables (err, data) ->
-#   console.log err, err.stack
+describe 'dynamodb interaction', ->
+
+  it 'creates the transaction table', (done) ->
+    lib.prepareTransactionsTable dynamodb, 'transactions-table', (e) ->
+      dynamodb.listTables (e, data) ->
+        should.not.exist e
+        data.TableNames.should.containEql 'transactions-table'
+        done()
+
+  it 'creates the images table', (done) ->
+    lib.prepareImagesTable dynamodb, 'images-table', (e) ->
+      dynamodb.listTables (e, data) ->
+        should.not.exist e
+        data.TableNames.should.containEql 'images-table'
+        done()
