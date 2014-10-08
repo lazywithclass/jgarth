@@ -9,6 +9,8 @@ as written in [the Wikipedia article about ACID](http://en.wikipedia.org/wiki/AC
 
 ### Testing
 
-To run tests either the usual `npm test` or `make test`.
+To run
 
-To run testem so that tests run on file change either `npm run dev` or `make -s`.
+ * unit tests: `npm test`
+ * database tests: `npm run integration`
+ * [Testem](https://github.com/airportyh/testem): `npm run dev`
