@@ -16,6 +16,7 @@ integration-test: git-hooks
 		-jar $$(pwd)/test/integration/lib/DynamoDBLocal.jar \
 		-inMemory \
 		-port 8000  &
+	sleep 3
 	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test/integration/main.coffee
 	ps -ef | grep [D]ynamoDBLocal_lib | awk '{print $$2}' | xargs kill
 
