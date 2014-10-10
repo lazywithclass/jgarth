@@ -102,5 +102,23 @@ describe 'lib', ->
 
   describe 'lockItem', ->
 
-    it 'exists', ->
-      should.exist @lib.lockItem
+    beforeEach -> @db = updateItem: sinon.stub().yields()
+    
+    it 'exists', -> should.exist @lib.lockItem
+
+    it 'calls updateItem', (done) ->
+      cb = sinon.stub()
+      @lib.lockItem @db, =>
+        @db.updateItem.calledOnce.should.be.true
+        done()
+    
+    it 'retries a maximum 10 times after which it calls back with an error', (done) ->
+      error = message: 'ConditionalCheckFailedException: some other text here'
+      @db = updateItem: sinon.stub().yields error
+      @lib.lockItem @db, (e) =>
+        @db.updateItem.callCount.should.equal 10
+        e.should.eql error
+        done()
+        
+    it.skip 'can acquire the lock on the item', ->
+      

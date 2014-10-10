@@ -92,8 +92,19 @@ var jgarth = {
     });
   },
 
-  lockItem: function() {
+  lockItem: function(db, done) {
     
+    function tryToAcquireTheLock(retries, cb) {
+      db.updateItem({}, function(e) {
+        if (e && e.message && e.message.indexOf('ConditionalCheckFailedException') > -1 && retries < 9) {
+          tryToAcquireTheLock(retries + 1, cb);
+        } else {
+          done(e);
+        }
+      });
+    }
+    
+    tryToAcquireTheLock(0, done);
   }
 };
 
