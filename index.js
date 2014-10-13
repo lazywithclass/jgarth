@@ -44,6 +44,24 @@ TransactionItem.prototype.updateItem = function(db, item, cb) {
   db.updateItem(query, cb);
 };
 
+function Transaction(db, done) {
+  this.id = uuid.v4();
+  this.db = db;
+
+  async.parallel([
+    function(cb) {
+      jgarth.prepareTransactionsTable(db, 'transactions-table', cb);
+    },
+    function(cb) {
+      jgarth.prepareImagesTable(db, 'images-table', cb);
+    }
+  ], function(err, results) {
+    done(err, new jgarth.TransactionItem({
+      id: this.id
+    }));
+  }.bind(this));
+}
+
 function _prepareTable(db, name, cb) {
   db.describeTable({
     TableName: name
@@ -52,8 +70,8 @@ function _prepareTable(db, name, cb) {
       return db.createTable({ 
         TableName: name,
         AttributeDefinitions: [{
-            AttributeName: 'TransactionId',
-            AttributeType: 'S'
+          AttributeName: 'TransactionId',
+          AttributeType: 'S'
         }], 
         KeySchema: [{
           AttributeName: 'TransactionId',
@@ -73,24 +91,11 @@ var jgarth = {
   
   TransactionItem: TransactionItem,
 
+  Transaction: Transaction,
+
   prepareTransactionsTable: _prepareTable,
   
   prepareImagesTable: _prepareTable,
-
-  transaction: function(db, done) {    
-    async.parallel([
-      function(cb) {
-        jgarth.prepareTransactionsTable(db, 'transactions-table', cb);
-      },
-      function(cb) {
-        jgarth.prepareImagesTable(db, 'images-table', cb);
-      }
-    ], function(err, results) {
-      done(err, new jgarth.TransactionItem({
-        id: uuid.v4()
-      }));
-    });
-  },
 
   lockItem: function(db, done) {
     
