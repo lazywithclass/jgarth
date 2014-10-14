@@ -24,24 +24,28 @@ describe 'transaction', ->
     should.exist transaction.db
 
   describe 'lockItem', ->
-
-    db = updateItem: sinon.stub().yields()
-    transaction = new Transaction db
     
-    it 'exists', -> should.exist transaction.lockItem
+    beforeEach ->
+      @db = updateItem: sinon.stub().yields()
+      @transaction = new Transaction @db
+    
+    it 'exists', -> should.exist @transaction.lockItem
 
     it 'calls updateItem', (done) ->
       cb = sinon.stub()
-      transaction.lockItem db, =>
-        db.updateItem.calledOnce.should.be.true
+      @transaction.lockItem {}, =>
+        @db.updateItem.calledOnce.should.be.true
         done()
     
     it 'retries a maximum 10 times after which it calls back with an error', (done) ->
       error = message: 'ConditionalCheckFailedException: some other text here'
       db = updateItem: sinon.stub().yields error
-      transaction.lockItem db, (e) =>
+      transaction = new Transaction db
+      transaction.lockItem {}, (e) ->
         db.updateItem.callCount.should.equal 10
         e.should.eql error
         done()
         
-    it.skip 'can acquire the lock on the item', ->      
+    it 'can acquire the lock on the item', ->      
+      @transaction.lockItem db, (e) =>
+      
