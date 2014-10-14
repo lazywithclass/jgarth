@@ -13,14 +13,14 @@ dynamodb = new awsSDK.DynamoDB endpoint: new awsSDK.Endpoint 'http://localhost:8
 describe 'dynamodb interaction', ->
 
   it 'creates the transaction table', (done) ->
-    lib.prepareTransactionsTable dynamodb, 'transactions-table', (e) ->
+    lib.prepareTable dynamodb, 'transactions-table', (e) ->
       dynamodb.listTables (e, data) ->
         should.not.exist e
         data.TableNames.should.containEql 'transactions-table'
         done()
 
   it 'creates the images table', (done) ->
-    lib.prepareImagesTable dynamodb, 'images-table', (e) ->
+    lib.prepareTable dynamodb, 'images-table', (e) ->
       dynamodb.listTables (e, data) ->
         should.not.exist e
         data.TableNames.should.containEql 'images-table'
