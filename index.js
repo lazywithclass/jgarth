@@ -45,7 +45,4 @@ var jgarth = {
   }
 };
 
-function prepareTable(db, name, cb) {
-}
-
 module.exports = jgarth;
