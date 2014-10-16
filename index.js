@@ -42,6 +42,16 @@ var jgarth = {
         jgarth.prepareTable(db, 'images-table', cb);
       }
     ], done);
+  },
+
+  transactional: function(db, cb) {
+    jgarth.prepareTables(db, function(e) {
+      if (e) {
+        return cb(e);
+      }
+
+      cb(e, new Transaction(db));
+    });
   }
 };
 

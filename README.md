@@ -2,7 +2,35 @@
 
 A module that brings the ACID where it's needed, typically in Amazon DynamoDB.
 
-### Important things first
+### Usage
+
+This is still very actively developed but the final API should be like:
+
+```javascript
+updateQuestion(questionQuery, function(e, updatedQuestion) {
+  addAnswer(answerQuery, function(e, updatedAnswer) {
+    // done
+  });
+}); 
+
+// what if updateQuestion succeeds but addAnswer fails 
+// for example for exceeded throughput?
+    
+jgarth.transactional(dynamodb, function(e, transaction) {
+
+  // you should take care of using transaction instead of the original
+  // dynamodb object this could change in the future if it will prove too
+  // cumbersome to use
+
+  updateQuestion(questionQuery, function(e, updatedQuestion) {
+    addAnswer(answerQuery, function(e, updatedAnswer) {
+      // done
+    });
+  }); 
+});
+```
+
+### Naming 
 
 The name comes from the initials of the people who coined the term and developed the theory behind it, 
 as written in [the Wikipedia article about ACID](http://en.wikipedia.org/wiki/ACID).

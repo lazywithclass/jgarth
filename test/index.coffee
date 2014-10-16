@@ -87,3 +87,37 @@ describe 'lib', ->
         err.should.equal 'ERROR'
         lib.prepareTable.restore()
         done()
+
+  describe 'transactional', ->
+
+    beforeEach ->
+      sinon.stub(lib, 'prepareTable').yields()
+      sinon.stub(lib, 'prepareTables').yields()
+
+    afterEach ->
+      lib.prepareTable.restore()
+      lib.prepareTables.restore()
+    
+    it 'is a function', ->
+      should.exist lib.transactional
+      lib.transactional.should.be.a.Function
+
+    it 'prepares tables', (done) ->
+      lib.transactional @db, =>
+        lib.prepareTables.calledOnce.should.be.true
+        lib.prepareTables.args[0][0].should.eql @db
+        done()        
+
+    it 'calls back giving a prepared Transaction instance', (done) ->
+      lib.transactional @db, (err, transaction) =>
+        should.exist transaction
+        transaction.should.be.an.instanceOf Transaction
+        done()
+
+    it 'errors if prepareTables errors', (done) ->
+      lib.prepareTables.restore()
+      sinon.stub(lib, 'prepareTables').yields 'ERROR'
+      lib.transactional @db, (err, transaction) =>
+        err.should.equal 'ERROR'
+        should.not.exist transaction
+        done()
