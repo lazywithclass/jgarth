@@ -17,7 +17,11 @@ integration-test: git-hooks
 		-inMemory \
 		-port 8000  &
 	sleep 3
-	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test/integration/main.coffee
+# a - in front command doesnt exit from the target
+# if command exits with an error code
+	-./node_modules/.bin/mocha \
+		--compilers coffee:coffee-script/register \
+		--reporter spec test/integration/main.coffee
 	ps -ef | grep [D]ynamoDBLocal_lib | awk '{print $$2}' | xargs kill
 
 .PHONY: test git-hooks
