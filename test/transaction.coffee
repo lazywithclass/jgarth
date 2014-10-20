@@ -1,6 +1,7 @@
 awsSDK = require 'aws-sdk'
 sinon = require 'sinon'
 should = require 'should'
+uuid = require 'node-uuid'
   
 describe 'transaction', ->
 
@@ -22,6 +23,36 @@ describe 'transaction', ->
   it 'stores the passed db object', ->
     transaction = new Transaction db
     should.exist transaction.db
+
+  describe 'updateItem', ->
+
+    beforeEach ->
+      @clock = sinon.useFakeTimers 42
+      sinon.stub(uuid, 'v4').returns 'this-is-a-fake-guid'
+
+    afterEach ->
+      uuid.v4.restore()
+      @clock.restore()
+    
+    it 'should add the item to the transaction', (done) ->
+      sinon.stub(db, 'updateItem').yields()
+      item = { answer: 42 }
+      transaction = new Transaction db
+      transaction.updateItem db, item, =>
+        db.updateItem.calledOnce.should.be.true
+        db.updateItem.args[0][0].TableName.should.equal 'transactions-table'
+        db.updateItem.args[0][0].AttributeUpdates.Requests.Value.S.should.equal JSON.stringify item
+        db.updateItem.args[0][0].AttributeUpdates.Requests.Action.should.equal 'PUT'
+        db.updateItem.args[0][0].AttributeUpdates.Version.Value.S.should.equal '1'
+        db.updateItem.args[0][0].AttributeUpdates.Version.Action.should.equal 'ADD'
+        db.updateItem.args[0][0].AttributeUpdates.Date.Value.S.should.equal '42'
+        db.updateItem.args[0][0].AttributeUpdates.Date.Action.should.equal 'PUT'        
+        db.updateItem.args[0][0].Expected.State.ComparisonOperator.should.equal 'EQ'
+        db.updateItem.args[0][0].Expected.State.AttributeValueList.should.eql [ { S: 'PENDING' } ]
+        # figure out how to handle the transaction id
+        db.updateItem.args[0][0].Key.TransactionId.should.eql S: 'this-is-a-fake-guid'
+        
+        done()
 
   describe 'lockItem', ->
     
@@ -101,3 +132,5 @@ describe 'transaction', ->
     it 'returns the transaction id of an item', ->
       transactionId = @transaction.getOwner TransactionId: S: 'this-is-a-hash'
       transactionId.should.equal 'this-is-a-hash'
+
+  
