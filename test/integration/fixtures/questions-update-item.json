@@ -1,0 +1,16 @@
+{
+    "TableName": "Questions",
+    "Key": {
+        "Id": {
+            "S": "42"
+        }
+    },
+    "AttributeUpdates": {
+        "Name": {
+            "Value": {
+                "S": "A question title"
+            },
+            "Action": "PUT"
+        }
+    }
+}

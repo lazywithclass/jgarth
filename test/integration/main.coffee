@@ -1,6 +1,7 @@
 should = require 'should'
 spawn = require('child_process').spawn
 awsSDK = require 'aws-sdk'
+async= require 'async'
 lib = require '../../index'
 
 awsSDK.config.update
@@ -25,3 +26,17 @@ describe 'dynamodb interaction', ->
         should.not.exist e
         data.TableNames.should.containEql 'images-table'
         done()
+
+  it 'writes to items', (done) ->
+    async.parallel [
+      (cb) -> lib.prepareTable dynamodb, 'questions', cb
+      (cb) -> lib.prepareTable dynamodb, 'answers', cb
+    ], (err, result) ->
+    
+      questionQuery = require './fixtures/questions-update-item.json'
+      answerQuery = require './fixtures/answers-update-item.json'
+      
+      lib.transactional dynamodb, (err, transaction) ->
+        transaction.updateItem questionQuery, (err, resultQuestion) ->
+          transaction.updateItem answerQuery, (err, resultAnswer) ->
+            done()
