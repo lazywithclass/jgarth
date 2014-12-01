@@ -13,39 +13,39 @@ dynamodb = new awsSDK.DynamoDB endpoint: new awsSDK.Endpoint 'http://localhost:8
 
 describe 'dynamodb interaction', ->
 
+  tables = ['transactions-table', 'images-table', 'questions', 'answers']
+
+  beforeEach (done) ->
+    createTable = (name, cb) -> lib.prepareTable dynamodb, name, cb
+    async.each tables, createTable, done
+
+  afterEach (done) ->
+    deleteTable = (name, cb) -> dynamodb.deleteTable TableName: name, cb
+    async.each tables, deleteTable, done
+  
   it 'creates the transaction table', (done) ->
-    lib.prepareTable dynamodb, 'transactions-table', (e) ->
-      dynamodb.listTables (e, data) ->
-        should.not.exist e
-        data.TableNames.should.containEql 'transactions-table'
-        done()
+    dynamodb.listTables (e, data) ->
+      should.not.exist e
+      data.TableNames.should.containEql 'transactions-table'
+      done()
 
   it 'creates the images table', (done) ->
-    lib.prepareTable dynamodb, 'images-table', (e) ->
-      dynamodb.listTables (e, data) ->
-        should.not.exist e
-        data.TableNames.should.containEql 'images-table'
-        done()
+    dynamodb.listTables (e, data) ->
+      should.not.exist e
+      data.TableNames.should.containEql 'images-table'
+      done()
 
   it 'writes to the transactions table', (done) ->
-    async.parallel [
-      (cb) -> lib.prepareTable dynamodb, 'questions', cb
-      (cb) -> lib.prepareTable dynamodb, 'answers', cb
-    ], (err, result) ->
-    
-      questionQuery = require './fixtures/questions-update-item.json'
-      answerQuery = require './fixtures/answers-update-item.json'
-      
-      lib.transactional dynamodb, (err, transaction) ->
-        transaction.updateItem questionQuery, (err, resultQuestion) ->
+    questionQuery = require './fixtures/questions-update-item.json'
+    answerQuery = require './fixtures/answers-update-item.json'
+  
+    lib.transactional dynamodb, (err, transaction) ->
+      transaction.updateItem questionQuery, (err, resultQuestion) ->
+        should.not.exist err
+        transaction.updateItem answerQuery, (err, resultAnswer) ->
           should.not.exist err
-          transaction.updateItem answerQuery, (err, resultAnswer) ->
-            should.not.exist err
-
-            dynamodb.scan TableName: 'transactions-table', (err, result) ->
-              should.not.exist err
-              result.Count.should.equal 1
-              done()
-
-  it.skip 'does not write if there is already a transaction pending', (done) ->
     
+          dynamodb.scan TableName: 'transactions-table', (err, result) ->
+            should.not.exist err
+            result.Count.should.equal 1
+            done()
