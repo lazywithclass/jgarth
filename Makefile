@@ -22,6 +22,7 @@ integration-test: git-hooks
     sleep 3; \
     ./node_modules/.bin/mocha --compilers coffee:coffee-script/register \
       --reporter spec \
+      --timeout 5000 \
       test/integration/main.coffee; \
     r=$$?; \
     kill $$pid; \
