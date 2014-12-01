@@ -38,7 +38,7 @@ describe 'transaction', ->
       sinon.stub(db, 'updateItem').yields()
       item = { answer: 42 }
       transaction = new Transaction db
-      transaction.updateItem db, item, =>
+      transaction.updateItem item, =>
         db.updateItem.calledOnce.should.be.true
         db.updateItem.args[0][0].TableName.should.equal 'transactions-table'
         db.updateItem.args[0][0].AttributeUpdates.Requests.Value.S.should.equal JSON.stringify item
