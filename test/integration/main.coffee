@@ -9,7 +9,7 @@ awsSDK.config.update
   secretAccessKey: 'secret'
   region: 'dagobah'
 dynamodb = new awsSDK.DynamoDB endpoint: new awsSDK.Endpoint 'http://localhost:8000'
-
+  
 
 describe 'dynamodb interaction', ->
 
@@ -27,7 +27,7 @@ describe 'dynamodb interaction', ->
         data.TableNames.should.containEql 'images-table'
         done()
 
-  it 'writes to items', (done) ->
+  it 'writes to the transactions table', (done) ->
     async.parallel [
       (cb) -> lib.prepareTable dynamodb, 'questions', cb
       (cb) -> lib.prepareTable dynamodb, 'answers', cb
@@ -38,5 +38,14 @@ describe 'dynamodb interaction', ->
       
       lib.transactional dynamodb, (err, transaction) ->
         transaction.updateItem questionQuery, (err, resultQuestion) ->
+          should.not.exist err
           transaction.updateItem answerQuery, (err, resultAnswer) ->
-            done()
+            should.not.exist err
+
+            dynamodb.scan TableName: 'transactions-table', (err, result) ->
+              should.not.exist err
+              result.Count.should.equal 1
+              done()
+
+  it.skip 'does not write if there is already a transaction pending', (done) ->
+    
