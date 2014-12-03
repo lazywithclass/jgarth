@@ -50,7 +50,24 @@ var jgarth = {
         return cb(e);
       }
 
-      cb(e, new Transaction(db));
+      var transaction = new Transaction(db);
+      cb(e, transaction, function(committed) {
+        var query = {
+          TableName: 'transactions-table',
+          KeyConditions: {
+            TransactionId: {
+              AttributeValueList: [ { S: transaction.id } ],
+              ComparisonOperator: 'EQ'
+            }
+          }
+        };
+        db.query(query, function(err, result) {
+          var actualQuery = JSON.parse(result.Items[0].Requests.S);
+          db.updateItem(actualQuery, function(err) {
+            committed();
+          });
+        });
+      });
     });
   }
 };

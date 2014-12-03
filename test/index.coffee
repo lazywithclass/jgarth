@@ -16,6 +16,8 @@ describe 'lib', ->
   beforeEach ->
     @db = new awsSDK.DynamoDB()
     sinon.stub(@db, 'createTable').yields()
+    sinon.stub(@db, 'query').yields()
+    sinon.stub(@db, 'updateItem').yields()
 
   afterEach -> @db.createTable.restore()
   
@@ -109,9 +111,53 @@ describe 'lib', ->
         done()        
 
     it 'calls back giving a prepared Transaction instance', (done) ->
-      lib.transactional @db, (err, transaction) =>
+      lib.transactional @db, (err, transaction) ->
         should.exist transaction
         transaction.should.be.an.instanceOf Transaction
+        done()
+
+    it 'calls back giving a commit function', (done) ->
+      lib.transactional @db, (err, transaction, commit) ->
+        should.exist commit
+        commit.should.be.a.Function
+        done()
+
+    describe 'commit', ->
+
+      it 'fetches the transaction', (done) ->
+        result =
+          Items: [
+            Requests:
+              S: JSON.stringify require './integration/fixtures/questions-update-item.json'
+          ]
+        @db.query.restore()
+        sinon.stub(@db, 'query').yields null, result
+        lib.transactional @db, (err, transaction, commit) =>
+          commit =>
+            @db.query.calledOnce.should.be.true
+            @db.query.args[0][0].TableName.should.equal 'transactions-table'
+            transactionId = @db.query.args[0][0].KeyConditions.TransactionId
+            transactionId.AttributeValueList[0].S.should.equal transaction.id
+            transactionId.ComparisonOperator.should.equal 'EQ'
+            done()
+
+      it 'writes to the required table', (done) ->
+        result =
+          Items: [
+            Requests:
+              S: JSON.stringify require './integration/fixtures/questions-update-item.json'
+          ]
+        @db.query.restore()
+        sinon.stub(@db, 'query').yields null, result
+        lib.transactional @db, (err, transaction, commit) =>
+          questionQuery = require './integration/fixtures/questions-update-item.json'
+          transaction.updateItem questionQuery, =>
+            commit =>
+              @db.updateItem.args[1][0].should.eql questionQuery
+              done()
+
+      it.skip 'writes to the required tables (multiple as requested)', (done) ->
+        # TODO
         done()
 
     it 'errors if prepareTables errors', (done) ->

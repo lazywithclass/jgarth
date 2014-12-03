@@ -1,14 +1,14 @@
 {
-    "TableName": "Questions",
+    "TableName": "Answers",
     "Key": {
         "Id": {
-            "S": "42"
+            "S": "21"
         }
     },
     "AttributeUpdates": {
         "Name": {
             "Value": {
-                "S": "A question title"
+                "S": "An answer title"
             },
             "Action": "PUT"
         }

@@ -13,14 +13,36 @@ dynamodb = new awsSDK.DynamoDB endpoint: new awsSDK.Endpoint 'http://localhost:8
 
 describe 'dynamodb interaction', ->
 
-  tables = ['transactions-table', 'images-table', 'questions', 'answers']
+  tables = [
+    { name: 'transactions-table', id: 'TransactionId' },
+    { name: 'images-table', id: 'TransactionId' },
+    { name: 'Questions', id: 'Id' },
+    { name: 'Answers', id: 'Id' }
+    ]
 
   beforeEach (done) ->
-    createTable = (name, cb) -> lib.prepareTable dynamodb, name, cb
+
+    createTable = (table, cb) ->
+      dynamodb.createTable({ 
+        TableName: table.name,
+        AttributeDefinitions: [{
+          AttributeName: table.id,
+          AttributeType: 'S'
+        }], 
+        KeySchema: [{
+          AttributeName: table.id,
+          KeyType: 'HASH'
+        }], 
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1
+        }
+      }, cb)
+
     async.each tables, createTable, done
 
   afterEach (done) ->
-    deleteTable = (name, cb) -> dynamodb.deleteTable TableName: name, cb
+    deleteTable = (table, cb) -> dynamodb.deleteTable TableName: table.name, cb
     async.each tables, deleteTable, done
   
   it 'creates the transaction table', (done) ->
@@ -37,15 +59,23 @@ describe 'dynamodb interaction', ->
 
   it 'writes to the transactions table', (done) ->
     questionQuery = require './fixtures/questions-update-item.json'
-    answerQuery = require './fixtures/answers-update-item.json'
   
     lib.transactional dynamodb, (err, transaction) ->
       transaction.updateItem questionQuery, (err, resultQuestion) ->
         should.not.exist err
-        transaction.updateItem answerQuery, (err, resultAnswer) ->
+        dynamodb.scan TableName: 'transactions-table', (err, result) ->
           should.not.exist err
-    
-          dynamodb.scan TableName: 'transactions-table', (err, result) ->
+          result.Count.should.equal 1
+          done()
+
+  it 'commits a transaction to the requested table', (done) ->
+    lib.transactional dynamodb, (err, transaction, commit) ->
+      should.not.exist err
+      questionQuery = require './fixtures/questions-update-item.json'
+      transaction.updateItem questionQuery, (err, a) ->
+        should.not.exist err
+        commit ->
+          dynamodb.scan TableName: 'Questions', (err, result) ->
             should.not.exist err
             result.Count.should.equal 1
             done()
