@@ -2,9 +2,16 @@
 
 A module that brings the ACID where it's needed, typically in Amazon DynamoDB.
 
+### Progress
+
+This is still under development, right now I'm working on:
+* delete transation after a successfull commit
+* write integration tests around `transactional` to be sure that
+it works with 2+ saves
+
 ### Usage
 
-This is still very actively developed but the final API should be like:
+This is still under development but the final API should be like:
 
 ```javascript
 updateQuestion(questionQuery, function(e, updatedQuestion) {
