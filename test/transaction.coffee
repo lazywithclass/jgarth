@@ -128,5 +128,3 @@ describe 'transaction', ->
     it 'returns the transaction id of an item', ->
       transactionId = @transaction.getOwner TransactionId: S: 'this-is-a-hash'
       transactionId.should.equal 'this-is-a-hash'
-
-  

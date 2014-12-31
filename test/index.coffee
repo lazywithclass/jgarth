@@ -9,7 +9,6 @@ describe 'testing', ->
 
 describe 'lib', ->
 
-  TransactionItem = require '../lib/TransactionItem'
   Transaction = require '../lib/Transaction'
   lib = require '../index'
   

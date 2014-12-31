@@ -1,11 +1,8 @@
-var TransactionItem = require('./lib/TransactionItem'),
-    async = require('async'),
+var async = require('async'),
     Transaction = require('./lib/Transaction');
 
 var jgarth = {
   
-  TransactionItem: TransactionItem,
-
   Transaction: Transaction,
 
   prepareTable: function(db, name, cb) {
