@@ -79,3 +79,13 @@ describe 'dynamodb interaction', ->
             should.not.exist err
             result.Count.should.equal 1
             done()
+
+  it 'deletes the transaction after the callback has been called', (done) ->
+    lib.transactional dynamodb, (err, transaction, commit) ->
+      questionQuery = require './fixtures/questions-update-item.json'
+      transaction.updateItem questionQuery, (err, a) ->
+        commit ->
+          dynamodb.scan TableName: 'transactions-table', (err, result) ->
+            should.not.exist err
+            result.Count.should.equal 0
+            done()

@@ -17,8 +17,13 @@ describe 'lib', ->
     sinon.stub(@db, 'createTable').yields()
     sinon.stub(@db, 'query').yields()
     sinon.stub(@db, 'updateItem').yields()
+    sinon.stub(@db, 'deleteItem').yields()
 
-  afterEach -> @db.createTable.restore()
+  afterEach ->
+    @db.createTable.restore()
+    @db.query.restore()
+    @db.updateItem.restore()
+    @db.deleteItem.restore()
   
   it 'could be required', -> should.exist lib
   
@@ -155,10 +160,20 @@ describe 'lib', ->
               @db.updateItem.args[1][0].should.eql questionQuery
               done()
 
-      it.skip 'writes to the required tables (multiple as requested)', (done) ->
-        # TODO
-        done()
-
+      it 'removes the transaction once it has been committed', (done) ->
+        result =
+          Items: [
+            Requests:
+              S: JSON.stringify require './integration/fixtures/questions-update-item.json'
+          ]
+        @db.query.restore()
+        sinon.stub(@db, 'query').yields null, result
+        lib.transactional @db, (err, transaction, commit) =>
+          transaction.updateItem {}, =>
+            commit =>
+              @db.deleteItem.calledOnce.should.be.true
+              done()
+        
     it 'errors if prepareTables errors', (done) ->
       lib.prepareTables.restore()
       sinon.stub(lib, 'prepareTables').yields 'ERROR'
