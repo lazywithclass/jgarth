@@ -2,6 +2,8 @@
 
 A module that brings the ACID where it's needed, typically in Amazon DynamoDB.
 
+More precisely I'm trying to add the A, so it should be ACD.
+
 ### Progress
 
 This is still under development, right now I'm working on:
