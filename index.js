@@ -43,6 +43,11 @@ var jgarth = {
   },
 
   transactional: function(db, cb) {
+    // get to a green and refactor this to be more clear
+    // * name functions
+    // * move the query away
+    // * macro that allows async.parallel without all the boilerplate
+    //   probabily this could be done with a more recent version of node?
     jgarth.prepareTables(db, function(e) {
       if (e) {
         return cb(e);
@@ -62,7 +67,14 @@ var jgarth = {
         db.query(query, function(err, result) {
           var actualQuery = JSON.parse(result.Items[0].Requests.S);
           db.updateItem(actualQuery, function(err) {
-            committed();
+            db.deleteItem({
+              TableName: 'transactions-table',
+              Key: {
+                TransactionId: {
+                  S: transaction.id
+                }
+              }
+            }, committed);
           });
         });
       });

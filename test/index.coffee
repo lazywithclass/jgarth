@@ -170,9 +170,15 @@ describe 'lib', ->
         sinon.stub(@db, 'query').yields null, result
         lib.transactional @db, (err, transaction, commit) =>
           transaction.updateItem {}, =>
-            commit =>
+            committed = =>
               @db.deleteItem.calledOnce.should.be.true
+              @db.deleteItem.args[0][0].should.eql
+                TableName: 'transactions-table'
+                Key:
+                  TransactionId:
+                    S: transaction.id
               done()
+            commit committed
         
     it 'errors if prepareTables errors', (done) ->
       lib.prepareTables.restore()
