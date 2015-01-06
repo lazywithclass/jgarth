@@ -8,7 +8,7 @@ git-hooks:
 	ln -fs `pwd`/git-hooks/pre-commit .git/hooks/pre-commit
 
 test: git-hooks
-	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test
+	./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec test --stack_trace_limit 10
 
 integration-test: git-hooks
 	{ java -Djava.library.path=$$(pwd)/test/integration/lib/DynamoDBLocal_lib \
