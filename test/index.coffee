@@ -1,3 +1,4 @@
+require 'clarify'
 should = require 'should'
 sinon = require 'sinon'
 awsSDK = require 'aws-sdk'

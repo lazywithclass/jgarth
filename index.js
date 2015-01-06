@@ -1,4 +1,3 @@
-require('clarify');
 var async = require('async'),
     Transaction = require('./lib/Transaction');
 
